@@ -1,3 +1,6 @@
-# First Project
+# First Project - Console Weather App
 
-I will continue working on this project. Actually stil deciding on the project.
+Using an free weather API and Java HTTP get function, I have created an App that runs on the console.
+<p>After inserting the city name, app will return the Weather data.</p>
+
+
