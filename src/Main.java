@@ -1,17 +1,29 @@
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.InputStream;
 import java.util.Scanner;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 
 public class Main {
-    static String APIKEY = "replace this"; //api key from https://www.weatherapi.com
+    static String APIKEY = " "; //api key from https://www.weatherapi.com
     public static void main(String[] args) {
-        System.out.println("Weather Forecast");
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter the city name: ");
-        String location = scanner.next();
-        CheckWeather(location);
+        String separator = "+----------------------------------+";
+        System.out.println(separator);
+        System.out.println("|           Weather Data           |");
+        System.out.println(separator);
+        while(true) {
+            Scanner scanner = new Scanner(System.in);
+            System.out.print("\nEnter the city name (99 to EXIT APP): ");
+            String location = scanner.next();
+            if(location.equals("99")) {
+                System.out.println("Exiting app..");
+                System.exit(0);
+            }
+            System.out.println("\nLoading Data..\n");
+            CheckWeather(location);
+        }
     }
 
     public static void CheckWeather(String location) {
@@ -19,48 +31,34 @@ public class Main {
             URL url = new URL("http://api.weatherapi.com/v1/current.json?key=" + APIKEY + "&q="+ location +"&aqi=no");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            StringBuilder response = new StringBuilder();
-            String line;
+            connection.setRequestProperty("accept", "application/json");
 
-            while ((line = reader.readLine()) != null) {
-                response.append(line);
-            }
+            InputStream responseStream = connection.getInputStream();
 
-            reader.close();
-            connection.disconnect();
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-            String jsonResponse = response.toString();
-
-            int nameIndex = jsonResponse.indexOf("\"name\":") + 8;
-            int nameEndIndex = jsonResponse.indexOf("\"", nameIndex);
-            String cityName = jsonResponse.substring(nameIndex, nameEndIndex);
-
-            int countryIndex = jsonResponse.indexOf("\"country\":") + 11;
-            int countryEndIndex = jsonResponse.indexOf("\"", countryIndex);
-            String country = jsonResponse.substring(countryIndex, countryEndIndex);
-
-            int timezoneIndex = jsonResponse.indexOf("\"tz_id\":") + 9;
-            int timzoneEndIndex = jsonResponse.indexOf("\"", timezoneIndex);
-            String timezone = jsonResponse.substring(timezoneIndex, timzoneEndIndex);
-
-            int weatherIndex = jsonResponse.indexOf("\"text\"") + 8;
-            int weatherendindex = jsonResponse.indexOf("\"", weatherIndex);
-            String weather = jsonResponse.substring(weatherIndex,weatherendindex);
-
-            int tempCIndex = jsonResponse.indexOf("\"temp_c\":") + 9;
-            int tempCEndIndex = jsonResponse.indexOf(",", tempCIndex);
-            double temperatureC = Double.parseDouble(jsonResponse.substring(tempCIndex, tempCEndIndex));
+            WeatherDATA data = mapper.readValue(responseStream, WeatherDATA.class);
 
 
-            System.out.println("\nLocation: "+cityName+ " ," + country +
-                    "\nTimezone: "+ timezone +
-                    "\nWeather: "+ weather +
-                    "\nTemperature: "+ temperatureC + "°C"
-            );
+            String separator = "+----------------------------------+";
+
+            System.out.println(separator);
+            System.out.println("|           Weather Data           |");
+            System.out.println(separator);
+            System.out.println("| Condition:         " + data.current.condition.text);
+            System.out.println("| Temperature:       " + data.current.temp_c + " °C");
+            System.out.println("| City Name:         " + data.location.name);
+            System.out.println("| Country:           " + data.location.country);
+            System.out.println("| Region:            " + data.location.region);
+            System.out.println("| Timezone:          " + data.location.tz_id);
+            System.out.println("| Local Time:        " + data.location.localtime);
+            System.out.println(separator);
+
+
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Location not found. Try Again!");
         }
     }
 }
