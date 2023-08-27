@@ -1,3 +1,5 @@
+package org.example;
+
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -7,7 +9,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class Main {
-    static String APIKEY = " "; //api key from https://www.weatherapi.com
+    static String APIKEY = "357abd1f39fe470d80c135938232308"; //api key from https://www.weatherapi.com
     public static void main(String[] args) {
         String separator = "+----------------------------------+";
         System.out.println(separator);
